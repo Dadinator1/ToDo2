@@ -12,10 +12,17 @@ class ToDoListViewController: UITableViewController {
     
     
     var itemArray = ["Find MIke", "Buy Eggs", "Destroy something"]
+    let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        // Bring in stored array on device from last use from sandbox for this app
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+            itemArray = items
+        }
+        
     }
     
     //MARK TableView Datasource Methods
@@ -61,6 +68,8 @@ class ToDoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //what will happen once the user clicks the add button on our UI Alert
             self.itemArray.append(catcherTextField.text!)
+            //store data into the apps storage area defined as defaults. It will be stored as TodoListArray[]
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
             //Reload data into tableView
             self.tableView.reloadData()
         }
