@@ -13,7 +13,16 @@ class ToDoListViewController: UITableViewController {
     
     //itemArray is now a reference to our stored data
     var itemArray = [StoredItems]()
-
+    
+    //Optional Category - will have no value first time this app used
+    var selectedCategory : Category? {
+        //if there is data we load it. didSet only executes if true
+        didSet{
+            //Bring in stored array on device from last use from sandbox for this app
+            loadItems()
+        }
+    }
+    
     //reference The Core Data DB
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
@@ -25,12 +34,10 @@ class ToDoListViewController: UITableViewController {
         //set path of .plist storage area that we have created so we can retrieve and edit data we store in it
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
-        // Bring in stored array on device from last use from sandbox for this app
-        loadItems()
         
     }
     
-    //MARK TableView Datasource Methods
+    //MARK: TableView Datasource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
@@ -68,7 +75,7 @@ class ToDoListViewController: UITableViewController {
     //MARK: - Add New Items
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         //local Vars
-        //A text field available to pass info to
+        //A text field available to pass info to. Kind of like a hidden form element
         var catcherTextField = UITextField()
         
       //create an alert and pop it up
@@ -79,6 +86,9 @@ class ToDoListViewController: UITableViewController {
             let newItem = StoredItems(context: self.context)
             newItem.title = catcherTextField.text!
             newItem.done = false
+            //Specify Parent category since their is a parent table to this table
+            newItem.parentCategory = self.selectedCategory
+            
             self.itemArray.append(newItem)
             
             self.saveItems()
@@ -109,10 +119,22 @@ class ToDoListViewController: UITableViewController {
     }
     //make inital load of all stored data in Core Data - or basically the SQLite DB
     //with request will use "request" as local var
-    //below statement says default value if request is not passed is StoredItems.fetchRequest() - this gets all the initial data on load
+    //below statement says default value if request is not passed in is StoredItems.fetchRequest() - this gets all the initial data on load
+    //Basically request and predicate are optional values to be passed in
     //the <StoredItems> is specifying data type - initially had below line in function below but shortened it
     //let request : NSFetchRequest<StoredItems> = StoredItems.fetchRequest()
-    func loadItems(with request: NSFetchRequest<StoredItems> = StoredItems.fetchRequest()){
+    func loadItems(with request: NSFetchRequest<StoredItems> = StoredItems.fetchRequest(), predicate: NSPredicate? = nil){
+        
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        
+        if let additionalPredicate = predicate {
+            //create compound query (predicate) if we recieve a predicate
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        }else{
+            //otherwise predicate is just the basic load of data
+           request.predicate = categoryPredicate
+        }
+        
         
         do{
            itemArray = try context.fetch(request)
@@ -133,12 +155,12 @@ extension ToDoListViewController: UISearchBarDelegate {
         //Query DB
         let request : NSFetchRequest<StoredItems> = StoredItems.fetchRequest()
         //search the title row of the DB for any string that contains what is in the searchbar text [cd] means case insensitive. Using SQL formatting
-        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+       let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
         
         //sort
         request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         
-        loadItems(with: request)
+        loadItems(with: request, predicate: predicate)
        
     }
     //every letter that is typed into search this is called
