@@ -7,19 +7,23 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController {
-
-    var itemArray = [StoredItems]()
     
-    //set path of .plist storage area that we have created so we can retrieve and edit data we store in it
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("StoredItems.plist")
+    //itemArray is now a reference to our stored data
+    var itemArray = [StoredItems]()
+
+    //reference The Core Data DB
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        //set path of .plist storage area that we have created so we can retrieve and edit data we store in it
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
         // Bring in stored array on device from last use from sandbox for this app
         loadItems()
@@ -47,8 +51,9 @@ class ToDoListViewController: UITableViewController {
 
     }
     
-    //MARK TableView Delegate Methods
+    //MARK: TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
         
         //add checkmark if newly tapped or take it away when tapped again
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
@@ -60,7 +65,7 @@ class ToDoListViewController: UITableViewController {
  
     }
 
-    //MARK - Add New Items
+    //MARK: - Add New Items
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         //local Vars
         //A text field available to pass info to
@@ -71,8 +76,9 @@ class ToDoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //what will happen once the user clicks the add button on our UI Alert
             
-            let newItem = StoredItems()
+            let newItem = StoredItems(context: self.context)
             newItem.title = catcherTextField.text!
+            newItem.done = false
             self.itemArray.append(newItem)
             
             self.saveItems()
@@ -89,33 +95,67 @@ class ToDoListViewController: UITableViewController {
         
     }
     
-    //Store Data into .plist storage area in app sandbox
+    //Store Data and commits everything in "context" to the DB
     func saveItems(){
         
-        let encoder = PropertyListEncoder()
-        
         do{
-            let data = try encoder.encode(self.itemArray)
-            try data.write(to: self.dataFilePath!)
+            try context.save()
         }catch{
-            print("Error encoding item array, \(error)")
+            print("Error saving context, \(error)")
         }
         
         //Reload data into tableView
         tableView.reloadData()
     }
-    //make inital load of all stored data in sandbox plist
-    func loadItems(){
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                itemArray = try decoder.decode([StoredItems].self, from: data)
-            }catch{
-                print("Error decoding item array, \(error)")
+    //make inital load of all stored data in Core Data - or basically the SQLite DB
+    //with request will use "request" as local var
+    //below statement says default value if request is not passed is StoredItems.fetchRequest() - this gets all the initial data on load
+    //the <StoredItems> is specifying data type - initially had below line in function below but shortened it
+    //let request : NSFetchRequest<StoredItems> = StoredItems.fetchRequest()
+    func loadItems(with request: NSFetchRequest<StoredItems> = StoredItems.fetchRequest()){
+        
+        do{
+           itemArray = try context.fetch(request)
+        }catch{
+           print("Error fetching data from context, \(error)")
+        }
+        //Reload data into tableView
+        tableView.reloadData()
+    }
+    
+    
+}
+
+//MARK: Searchbar methods
+extension ToDoListViewController: UISearchBarDelegate {
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        //Query DB
+        let request : NSFetchRequest<StoredItems> = StoredItems.fetchRequest()
+        //search the title row of the DB for any string that contains what is in the searchbar text [cd] means case insensitive. Using SQL formatting
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        //sort
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        loadItems(with: request)
+       
+    }
+    //every letter that is typed into search this is called
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        //bring back all results and get rid of keyboard
+        if searchBar.text?.count == 0 {
+            loadItems()
+            
+            //this function assigns projects to different threads - prevents GUI from freezing up while it done
+            DispatchQueue.main.async {
+                //get rid of searchbar
+                searchBar.resignFirstResponder()
             }
             
         }
     }
     
 }
+
 
