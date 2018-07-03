@@ -8,7 +8,8 @@
 
 import Foundation
 
-class StoredItems {
+//Codable means that this class conforms to encoding and decoding of data stored in .plist
+class StoredItems: Codable {
     
     var title : String = ""
     var done : Bool = false

@@ -9,31 +9,20 @@
 import UIKit
 
 class ToDoListViewController: UITableViewController {
-    
-    
+
     var itemArray = [StoredItems]()
-    let defaults = UserDefaults.standard
+    
+    //set path of .plist storage area that we have created so we can retrieve and edit data we store in it
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("StoredItems.plist")
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        let newItem = StoredItems()
-        newItem.title = "Find Mike"
-        itemArray.append(newItem)
-        
-        let newItem2 = StoredItems()
-        newItem2.title = "Find Mike2"
-        itemArray.append(newItem2)
-        
-        let newItem3 = StoredItems()
-        newItem3.title = "Find Mike3"
-        itemArray.append(newItem3)
         
         // Bring in stored array on device from last use from sandbox for this app
-        if let items = defaults.array(forKey: "TodoListArray") as? [StoredItems] {
-            itemArray = items
-        }
+        loadItems()
         
     }
     
@@ -64,8 +53,7 @@ class ToDoListViewController: UITableViewController {
         //add checkmark if newly tapped or take it away when tapped again
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        //reload Table
-        tableView.reloadData()
+        saveItems()
         
         //animate cell on click - not leave it gray
         tableView.deselectRow(at: indexPath, animated: true)
@@ -87,10 +75,7 @@ class ToDoListViewController: UITableViewController {
             newItem.title = catcherTextField.text!
             self.itemArray.append(newItem)
             
-            //store data into the apps storage area defined as defaults. It will be stored as TodoListArray[]
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
-            //Reload data into tableView
-            self.tableView.reloadData()
+            self.saveItems()
         }
         //add input text field
         alert.addTextField { (alertTextfield) in
@@ -104,6 +89,33 @@ class ToDoListViewController: UITableViewController {
         
     }
     
+    //Store Data into .plist storage area in app sandbox
+    func saveItems(){
+        
+        let encoder = PropertyListEncoder()
+        
+        do{
+            let data = try encoder.encode(self.itemArray)
+            try data.write(to: self.dataFilePath!)
+        }catch{
+            print("Error encoding item array, \(error)")
+        }
+        
+        //Reload data into tableView
+        tableView.reloadData()
+    }
+    //make inital load of all stored data in sandbox plist
+    func loadItems(){
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([StoredItems].self, from: data)
+            }catch{
+                print("Error decoding item array, \(error)")
+            }
+            
+        }
+    }
     
 }
 
