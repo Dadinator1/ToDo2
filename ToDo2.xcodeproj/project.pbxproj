@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CBEF6D1054748FCACEA4EBB1 /* Pods_ToDo2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42B8853D70F14A766F30A7FE /* Pods_ToDo2.framework */; };
 		E2C1720320EB6EB700395C81 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2C1720220EB6EB700395C81 /* AppDelegate.swift */; };
 		E2C1720520EB6EB700395C81 /* ToDoListViiewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2C1720420EB6EB700395C81 /* ToDoListViiewController.swift */; };
 		E2C1720820EB6EB700395C81 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E2C1720620EB6EB700395C81 /* Main.storyboard */; };
@@ -17,6 +18,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		42B8853D70F14A766F30A7FE /* Pods_ToDo2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ToDo2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB2AFA7BC275C5F49730BF73 /* Pods-ToDo2.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ToDo2.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ToDo2/Pods-ToDo2.debug.xcconfig"; sourceTree = "<group>"; };
+		D33938D0B5A2550146301BF1 /* Pods-ToDo2.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ToDo2.release.xcconfig"; path = "Pods/Target Support Files/Pods-ToDo2/Pods-ToDo2.release.xcconfig"; sourceTree = "<group>"; };
 		E2C171FF20EB6EB700395C81 /* ToDo2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDo2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2C1720220EB6EB700395C81 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E2C1720420EB6EB700395C81 /* ToDoListViiewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListViiewController.swift; sourceTree = "<group>"; };
@@ -33,17 +37,37 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CBEF6D1054748FCACEA4EBB1 /* Pods_ToDo2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0DD76A16A81483FA685BB4E7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				42B8853D70F14A766F30A7FE /* Pods_ToDo2.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		7B06C90602C799B11F3F0D90 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				BB2AFA7BC275C5F49730BF73 /* Pods-ToDo2.debug.xcconfig */,
+				D33938D0B5A2550146301BF1 /* Pods-ToDo2.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		E2C171F620EB6EB700395C81 = {
 			isa = PBXGroup;
 			children = (
 				E2C1720120EB6EB700395C81 /* ToDo2 */,
 				E2C1720020EB6EB700395C81 /* Products */,
+				7B06C90602C799B11F3F0D90 /* Pods */,
+				0DD76A16A81483FA685BB4E7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -109,9 +133,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E2C1721120EB6EB800395C81 /* Build configuration list for PBXNativeTarget "ToDo2" */;
 			buildPhases = (
+				31B8CA9C92CB52CAEDA017CE /* [CP] Check Pods Manifest.lock */,
 				E2C171FB20EB6EB700395C81 /* Sources */,
 				E2C171FC20EB6EB700395C81 /* Frameworks */,
 				E2C171FD20EB6EB700395C81 /* Resources */,
+				C064A55493BB819487DBA05B /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -167,6 +193,47 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		31B8CA9C92CB52CAEDA017CE /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ToDo2-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C064A55493BB819487DBA05B /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-ToDo2/Pods-ToDo2-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ToDo2/Pods-ToDo2-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E2C171FB20EB6EB700395C81 /* Sources */ = {
@@ -318,6 +385,7 @@
 		};
 		E2C1721220EB6EB800395C81 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BB2AFA7BC275C5F49730BF73 /* Pods-ToDo2.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -336,6 +404,7 @@
 		};
 		E2C1721320EB6EB800395C81 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D33938D0B5A2550146301BF1 /* Pods-ToDo2.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
