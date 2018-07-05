@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class ToDoListViewController: UITableViewController {
+class ToDoListViewController: SwipeTableViewController {
     
     //itemObj is now a reference to our stored data
     var itemObj : Results<StoredItems>?
@@ -30,24 +30,20 @@ class ToDoListViewController: UITableViewController {
         // Do any additional setup after loading the view, typically from a nib.
         
         //set path of .plist storage area that we have created so we can retrieve and edit data we store in it
-       // print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        
+        //print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
     }
     
     //MARK: TableView Datasource Methods
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemObj?.count ?? 1
-    }
-    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        
+        //taps into super of this class
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+
         if let item = itemObj?[indexPath.row] {
             cell.textLabel?.text = item.title
-            print("item Valeu is \(item.title)")
+            print("item Value is \(item.title)")
             //use Ternary operator Just like Javascript
             cell.accessoryType = item.done ? .checkmark : .none
             
@@ -56,9 +52,14 @@ class ToDoListViewController: UITableViewController {
             print("No Item Added")
         }
         
-        return cell        
-
+        return cell
     }
+    
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return itemObj?.count ?? 1
+    }
+    
     
     //MARK: TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -133,6 +134,25 @@ class ToDoListViewController: UITableViewController {
         tableView.reloadData()
     }
     
+    //MARK: - Delete data from swipe
+    override func updateModel(at indexPath: IndexPath) {
+        
+        //This says bring in all the normal functoionality of this class
+        //if this wasn't here then we would basically keep anything in that function from happening
+        super.updateModel(at: indexPath)
+        
+        if let item = self.itemObj?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    //Would delete item if clicked on
+                    self.realm.delete(item)
+                }
+            }catch{
+                print("Error Deleting Category, \(error)")
+            }
+        }
+        
+    }
     
 }
 
