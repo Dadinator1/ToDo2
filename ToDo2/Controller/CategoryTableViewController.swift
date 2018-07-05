@@ -7,16 +7,19 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryTableViewController: UITableViewController {
     
-    //categoryArray is now a reference to our stored data
-    var categoryArray = [Category]()
+    //no need to worry about try/catch
+    let realm = try! Realm()
     
+    //categoryObj is now a reference to our stored data
+    //var categoryObj = [Category]()
     
-    //reference The Core Data DB
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    //By Using Results we can use almost any data type. it is auto updating for Realm Queries
+    var categoryObj : Results<Category>?
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +36,8 @@ class CategoryTableViewController: UITableViewController {
     //MARK: - TableView Datasource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoryArray.count
+        //Use Nil Coalescing Operator - if categoryObj is nil then make categoryObj.count = 1
+        return categoryObj?.count ?? 1
     }
     
  
@@ -50,7 +54,7 @@ class CategoryTableViewController: UITableViewController {
         //Grab the category that corresponds to selected cell
         if let indexPath = tableView.indexPathForSelectedRow {
             //selectedCategory - is found in ToDoListViewController.swift
-            destinationVC.selectedCategory = categoryArray[indexPath.row]
+            destinationVC.selectedCategory = categoryObj?[indexPath.row]
         }
     }
     
@@ -60,9 +64,7 @@ class CategoryTableViewController: UITableViewController {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
         
-        let item = categoryArray[indexPath.row]
-        
-        cell.textLabel?.text = item.name
+        cell.textLabel?.text = categoryObj?[indexPath.row].name ?? "No Categories Yet"
         
         return cell
         
@@ -81,11 +83,10 @@ class CategoryTableViewController: UITableViewController {
         let action = UIAlertAction(title: "Add List", style: .default) { (action) in
             //what will happen once the user clicks the add button on our UI Alert
             
-            let newItem = Category(context: self.context)
+            let newItem = Category()
             newItem.name = catcherTextField.text!
-            self.categoryArray.append(newItem)
-            
-            self.saveItems()
+            //no need to append array like before we just update the category Obj
+            self.saveItems(category: newItem)
         }
         //add input text field
         alert.addTextField { (alertTextfield) in
@@ -101,10 +102,12 @@ class CategoryTableViewController: UITableViewController {
     }
     
     //Store Data and commits everything in "context" to the DB
-    func saveItems(){
+    func saveItems(category: Category){
         
         do{
-            try context.save()
+            try realm.write {
+                realm.add(category)
+            }
         }catch{
             print("Error saving context, \(error)")
         }
@@ -112,19 +115,11 @@ class CategoryTableViewController: UITableViewController {
         //Reload data into tableView
         tableView.reloadData()
     }
-    //make inital load of all stored data in Core Data - or basically the SQLite DB
-    //with request will use "request" as local var
-    //below statement says default value if request is not passed is Category.fetchRequest() - this gets all the initial data on load
-    //the <Category> is specifying data type - initially had below line in function below but shortened it
-    //let request : NSFetchRequest<Category> = Category.fetchRequest()
-    func loadItems(with request: NSFetchRequest<Category> = Category.fetchRequest()){
+    //make inital load of all stored data in Realm DB
+    func loadItems(){
+        //will pull everything out of Category table
+        categoryObj = realm.objects(Category.self)
         
-        do{
-            categoryArray = try context.fetch(request)
-        }catch{
-            print("Error fetching data from context, \(error)")
-        }
-        //Reload data into tableView
         tableView.reloadData()
     }
     
